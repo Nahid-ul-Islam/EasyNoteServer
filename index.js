@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require("cors");
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const app = express();
 app.use(cors());
@@ -32,9 +32,31 @@ async function run() {
             res.send(result);
         });
 
+        //add a new note
         app.post('/my-notes', async(req, res) => {
             const doc = req.body;
             const result = await notesColection.insertOne(doc);
+            res.send(result);
+        });
+
+        //update note
+        app.put('/my-notes/:id', async(req, res) => {
+            const id = req.params.id;
+            const updatedNote = req.body;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert:true};
+            const updateDoc = {
+                $set: updatedNote
+            }
+            const result = await notesColection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        });
+
+        //delete note 
+        app.delete('/my-notes/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await notesColection.deleteOne(query);
             res.send(result);
         });
         
